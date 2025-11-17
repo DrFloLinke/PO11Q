@@ -183,8 +183,6 @@ EU$area <- NULL
 # (country, population in 2018, accession factor, and founding dummy)
 EU_pop <- select(EU, country, pop18, access_fac, founding)
 
-# Base R alternative for selecting variables
-EU_pop <- subset(EU, select = c(country, pop18, access_fac, founding))
 
 # Create 'EU_pop1' by dropping the variables 'access' and 'GDP_2015' from 'EU'
 EU_pop1 <- select(EU, -access, -GDP_2015)
@@ -197,14 +195,8 @@ EU_pop1 <- select(EU, -access, -GDP_2015)
 # Create 'EU_nobenelux' by dropping rows 1, 16, and 19 (Benelux countries)
 EU_nobenelux <- slice(EU, -1, -16, -19)
 
-# Base R alternative for dropping rows 1, 16, and 19
-EU_nobenelux <- EU[c(-1, -16, -19), ]
-
 # Create 'EU_benelux' by keeping only rows 1, 16, and 19
 EU_benelux <- slice(EU, 1, 16, 19)
-
-# Base R alternative for keeping only rows 1, 16, and 19
-EU_benelux <- EU[c(1, 16, 19), ]
 
 
 ############################
@@ -213,9 +205,6 @@ EU_benelux <- EU[c(1, 16, 19), ]
 
 # Keep only countries with population > 10,000,000 in 2018
 EU_pop_large <- filter(EU, pop18 > 10000000)
-
-# Base R alternative: subset using a logical condition
-EU_pop_large <- subset(EU, pop18 > 10000000)
 
 
 
@@ -281,5 +270,3 @@ eu_popaccess_order <- arrange(eu_popaccess, desc(avg))
 # Inspect the ordered summary table
 eu_popaccess_order
 
-# Base R alternative: order 'eu_popaccess' by 'avg' descending
-eu_popaccess_order <- eu_popaccess[order(desc(eu_popaccess$avg)), ]
