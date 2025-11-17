@@ -544,7 +544,7 @@
     "href": "07-PO11Q.html#preliminary-stuff",
     "title": "Week 7",
     "section": "Preliminary Stuff",
-    "text": "Preliminary Stuff\nCreate a working directory (folder) for Week 7, create an RScript for Week 7, and set the working directory. In my case:\n\nsetwd(\"~/Warwick/Modules/PO11Q/Seminars/Week 7/Worksheet\")\n\nLoad the data set Example.xlsx (taken from European Comission (n.d.)) into R:\n\nlibrary(readxl)\n\nEU &lt;- read_excel(\"EU.xlsx\", sheet=\"Sheet1\")\n\nNow copy/paste the entire RScript from Week 5 into the Week 7 RScript. Run the entire script by highlighting everything (“command”/“a” on a Mac and “ctrl”/“a” on Windows) and executing. You should now have a completely and correctly coded data frame that is ready to work with in your R Workspace. If not, give me a shout to sort out problems.",
+    "text": "Preliminary Stuff\nCreate a working directory (folder) for Week 7, create an RScript for Week 7, and set the working directory. In my case:\n\nsetwd(\"~/Warwick/Modules/PO11Q/Seminars/Week 7/Worksheet\")\n\nLoad the data set EU.xlsx (taken from European Comission (n.d.)) into R:\n\nlibrary(readxl)\n\nEU &lt;- read_excel(\"EU.xlsx\", sheet=\"Sheet1\")\n\nNow copy/paste the entire RScript from Week 5 into the Week 7 RScript. Run the entire script by highlighting everything (“command”/“a” on a Mac and “ctrl”/“a” on Windows) and executing. You should now have a completely and correctly coded data frame that is ready to work with in your R Workspace. If not, give me a shout to sort out problems.",
     "crumbs": [
       "<span class='chapter-number'>8</span>  <span class='chapter-title'>Week 7</span>"
     ]
