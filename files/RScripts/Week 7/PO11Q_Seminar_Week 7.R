@@ -1,175 +1,21 @@
-########################################
-# PO11Q - Worksheet Week 7
-########################################
+#############################################################
+# PO11Q - Introduction to Quantitative Political Analysis I
+# Worksheet Week 7
+#############################################################
 
+
+# clear R memory
 rm(list=ls())
 
-# Set Working Directory 
+# Set Working Directory (insert your file path, or choose from the menu 'Session')
 setwd()
 
-# PO11Q - Worksheet Week 5
-##########################
+# >>>> Please run the RScript from Week 5 now <<<<
 
-# Read in Data
-
-library(readxl)
-
-EU <- read_excel("EU.xlsx", sheet="Sheet1")
-
-head(EU)
-
-names(EU)
-
-str(EU)
-
-# Nominal Variables
-EU$country = factor(EU$country)
-
-# Ordinal Variables
-EU$access_fac = factor(EU$access, ordered = TRUE)
-
-library(tidyverse)
-
-EU <- EU %>%
-  mutate(wave = recode(access_fac, '1951'="Founding", 
-                       '1973'= "First",
-                       '1981'= "Mediterranean",
-                       '1986' = "Mediterranean",
-                       '1995' = "Cold War",
-                       '2004' = "Eastern",
-                       '2007' = "Eastern",
-                       '2013' = "Balkans"))
-
-
-EU <- EU %>%
-  mutate(wave = recode(access_fac, '1951'="Founding", 
-                       '1973'= "First",
-                       '1981'= "Mediterranean",
-                       '1986' = "Mediterranean",
-                       '1995' = "Cold War",
-                       '2004' = "Eastern",
-                       '2007' = "Eastern",
-                       '2013' = "Balkans"), ordered=TRUE)
-
-head(EU$wave_order)
-
-
-EU <- EU %>% 
-  mutate(wave1=cut(access, 
-                   breaks=c(1950, 1951, 1973, 1986, 1995, 2007, 2013), 
-                   labels=c("Founding","First",
-                            "Mediterranean", 
-                            "Cold War", 
-                            "Eastern", 
-                            "Balkans"))) 
-
-levels(EU$wave1)
-
-
-
-EU$wave_order1 <- ordered(EU$wave1, levels = c("Founding",
-                                               "First",
-                                               "Mediterranean", 
-                                               "Cold War",
-                                               "Eastern", 
-                                               "Balkans"))
-
-head(EU$wave_order1)
-
-
-
-
-
-
-# Binary Dummy
-
-EU <- EU %>%
-  mutate(founding = recode(access_fac, '1951'="Yes", 
-                           '1973' = "No",
-                           '1981' = "No",
-                           '1986' = "No",
-                           '1995' = "No",
-                           '2004' = "No",
-                           '2007' = "No",
-                           '2013' = "No"))
-
-# OR, much shorter
-
-EU <- EU %>% 
-  mutate(founding = factor(ifelse(access_fac=="1951", "Yes", "No"), 
-                           levels =c("Yes", "No")))
-
-# the result is the same
-
-str(EU$founding)
-
-
-
-# Sub-Setting Data
-
-## By Variable
-
-EU2$area <- NULL
-
-EU_pop <- select(EU2, country, pop18, access_fac, founding)
-
-EU_pop1 <- select(EU2, -access, -GDP_2015)
-
-
-
-## By Observation
-
-
-EU_nobenelux <- slice(EU2, -1, -16, -19)
-
-EU_benelux <- slice(EU2, 1, 16, 19)
-
-
-## Keep if a variable has a certain value, e.g. 'pop18' larger than 10,000,000
-
-EU_pop_large <- filter(EU2, pop18 > 10000000)
-
-# Ordering Data
-
-EU_subset <- select(EU2, country, pop18, access)
-
-eu_order <- arrange(EU_subset, pop18)
-
-eu_order[1:10,]
-
-eu_order <- arrange(EU_subset, desc(pop18))
-eu_order[1:10,]
-
-eu_order <- arrange(EU_subset, access, pop18)
-
-eu_order[1:10,]
-
-
-# Grouping Data
-
-
-eu_access <- group_by(EU_subset, access)
-
-ungroup(EU_subset)
-
-EU_subset %>% 
-  group_by(access) %>% 
-  summarise(avg = mean(pop18)) -> eu_popaccess
-
-eu_popaccess
-
-
-# Combining Ordering and Grouping Data
-
-
-eu_popaccess_order <- arrange(eu_popaccess, desc(avg))
-
-eu_popaccess_order
 
 
 # PO11Q - Worksheet Week 7
 ##########################
-
 
 mean(EU$pop18)
 
