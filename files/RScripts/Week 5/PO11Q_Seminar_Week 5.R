@@ -1,6 +1,6 @@
 ############################################################
 # PO11Q - Introduction to Quantitative Political Analysis I
-# WEEK %
+# WEEK 5
 ############################################################
 
 
@@ -18,9 +18,9 @@ install.packages(
 rsthemes::install_rsthemes()
 
 
-############################
+##########################################
 # First steps: R as a calculator
-############################
+##########################################
 
 # Use R as a calculator: add 5 and 3
 5 + 3
@@ -41,9 +41,9 @@ result
 setwd("~/Warwick/Modules/PO11Q/Seminars/Week 5/R Week 5")
 
 
-############################
+##########################################
 # Packages: installing and loading
-############################
+##########################################
 
 # Install the 'readxl' package (needed to read Excel files)
 install.packages("readxl")
@@ -80,9 +80,9 @@ names(EU)
 str(EU)
 
 
-############################
+########################################################
 # Variable types: factors and ordered factors
-############################
+########################################################
 
 # Treat the variable 'country' as a factor (categorical / nominal variable)
 EU$country <- factor(EU$country)
@@ -92,9 +92,9 @@ EU$country <- factor(EU$country)
 EU$access_fac <- factor(EU$access, ordered = TRUE)
 
 
-############################
+##########################################
 # Recode accession years into named waves
-############################
+##########################################
 
 # Recode 'access_fac' into an ordered factor 'wave'
 # giving each accession wave a descriptive label (e.g. "Founding", "First", etc.)
@@ -118,9 +118,9 @@ EU <- EU %>%
 levels(EU$wave)
 
 
-############################
+########################################################
 # Recode accession years into waves using cut()
-############################
+########################################################
 
 # Create a new factor variable 'wave1' using cut() on the numeric 'access' variable
 # and assign descriptive labels to each interval
@@ -141,9 +141,9 @@ EU <- EU %>%
   )
 
 
-############################
+######################################################################
 # Creating a binary (dummy) variable: founding member or not
-############################
+######################################################################
 
 # Tidyverse approach: recode accession year into "Yes"/"No" for founding members
 EU <- EU %>%
@@ -172,9 +172,9 @@ EU <- EU %>%
 
 
 
-############################
+########################################################
 # Dropping and selecting variables (columns)
-############################
+########################################################
 
 # Permanently drop the variable 'area' from the data frame 'EU'
 EU$area <- NULL
@@ -188,9 +188,9 @@ EU_pop <- select(EU, country, pop18, access_fac, founding)
 EU_pop1 <- select(EU, -access, -GDP_2015)
 
 
-############################
+########################################################
 # Subsetting observations (rows) by position
-############################
+########################################################
 
 # Create 'EU_nobenelux' by dropping rows 1, 16, and 19 (Benelux countries)
 EU_nobenelux <- slice(EU, -1, -16, -19)
@@ -199,9 +199,9 @@ EU_nobenelux <- slice(EU, -1, -16, -19)
 EU_benelux <- slice(EU, 1, 16, 19)
 
 
-############################
+########################################################
 # Subsetting observations based on a condition
-############################
+########################################################
 
 # Keep only countries with population > 10,000,000 in 2018
 EU_pop_large <- filter(EU, pop18 > 10000000)
@@ -229,9 +229,9 @@ eu_order[1:10, ]
 
 
 
-############################
+##########################################
 # Ordering by multiple variables
-############################
+##########################################
 
 # Order first by accession year 'access', then by population 'pop18' (both ascending)
 eu_order <- arrange(EU_subset, access, pop18)
@@ -240,9 +240,9 @@ eu_order <- arrange(EU_subset, access, pop18)
 eu_order[1:10, ]
 
 
-############################
+########################################################
 # Grouping data and calculating group summaries
-############################
+########################################################
 
 # Group the data by accession year 'access'
 eu_access <- group_by(EU_subset, access)
@@ -260,9 +260,9 @@ eu_popaccess
 
 
 
-############################
+##########################################
 # Combining grouping and ordering
-############################
+##########################################
 
 # Order the grouped summary 'eu_popaccess' by average population (descending)
 eu_popaccess_order <- arrange(eu_popaccess, desc(avg))
