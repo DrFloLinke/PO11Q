@@ -28,6 +28,10 @@ html, body, main, .quarto-container {
   font-weight: 350;
 }
 
+.indent {
+  margin-left: 2em;
+}
+
 /* ----------------------------------------
    Headings
 ---------------------------------------- */
