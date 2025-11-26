@@ -60,7 +60,7 @@ library(tidyverse)
 ############################
 
 # Read the Excel file 'EU.xlsx' (Sheet1) from the working directory into an object called 'EU'
-EU <- rehbad_excel("EU.xlsx", sheet = "Sheet1")
+EU <- read_excel("EU.xlsx", sheet = "Sheet1")
 
 
 ############################
