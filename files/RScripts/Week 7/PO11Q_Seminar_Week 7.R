@@ -1,7 +1,8 @@
-#############################################################
-# PO11Q - Introduction to Quantitative Political Analysis I
-# Worksheet Week 7
-#############################################################
+#########################################################################
+# PO11Q - Quantitative Political Analysis: From Measurement to Inference
+# Dr Flo Linke
+# WEEK 7
+#########################################################################
 
 
 # clear R memory
