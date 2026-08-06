@@ -607,17 +607,42 @@ figcaption.quarto-float-caption-top {
 
 .glossary-table table,
 .glossary-table th,
-.glossary-table td { border: none !important; border-collapse: collapse; }
-.glossary-table table { border-top: 4px double var(--fg) !important; border-bottom: 4px double var(--fg) !important; }
+.glossary-table td {
+  border: none !important;
+  border-collapse: collapse;
+}
+
+.glossary-table table {
+  width: 100% !important;
+  table-layout: fixed !important;
+  border-top: 4px double var(--fg) !important;
+  border-bottom: 4px double var(--fg) !important;
+}
+
 .glossary-table thead tr,
-.glossary-table thead th { border-bottom: 1.5px solid var(--fg) !important; }
-.glossary-table th, .glossary-table td { text-align: left; padding: 0.7em 0.4em; }
+.glossary-table thead th {
+  border-bottom: 1.5px solid var(--fg) !important;
+}
 
+.glossary-table th,
+.glossary-table td {
+  text-align: left;
+  padding: 0.7em 0.4em;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
 
-.glossary-table td:first-child,
-.glossary-table th:first-child { min-width: 1.25in; }
+.glossary-table colgroup col:first-child,
+.glossary-table th:first-child,
+.glossary-table td:first-child {
+  width: 25% !important;
+}
 
-
+.glossary-table colgroup col:nth-child(2),
+.glossary-table th:nth-child(2),
+.glossary-table td:nth-child(2) {
+  width: 75% !important;
+}
 
 
 /* ----------------------------------------
@@ -1202,18 +1227,21 @@ table.tinytable thead tr:first-child th {
   border-top: 2px solid #e1e2ea !important;
 }
 
-/* Line inside header: between group row and model row (results columns only) */
-.tt-oneiv  table.tinytable thead tr:nth-child(1) th:not(:first-child),
-.tt-oneiv-nogof  table.tinytable thead tr:nth-child(1) th:not(:first-child),
-.tt-twoiv  table.tinytable thead tr:nth-child(1) th:not(:first-child),
-.tt-twoiv-nogof  table.tinytable thead tr:nth-child(1) th:not(:first-child),
+
+/* Line inside header */
+.tt-oneiv table.tinytable thead tr:nth-child(1) th:not(:first-child),
+.tt-oneiv-nogof table.tinytable thead tr:nth-child(1) th:not(:first-child),
+.tt-twoiv table.tinytable thead tr:nth-child(1) th:not(:first-child),
+.tt-twoiv-nogof table.tinytable thead tr:nth-child(1) th:not(:first-child),
 .tt-threeiv table.tinytable thead tr:nth-child(1) th:not(:first-child),
+.tt-threeiv-nogof table.tinytable thead tr:nth-child(1) th:not(:first-child),
+.tt-sixiv table.tinytable thead tr:nth-child(1) th:not(:first-child),
+.tt-sixiv-nogof table.tinytable thead tr:nth-child(1) th:not(:first-child),
 .tt-threeiv-grouping table.tinytable thead tr:nth-child(1) th:not(:first-child) {
   border-bottom: 0.5px solid #e1e2ea !important;
 }
 
-/* Short group lines under "Emergence" (cols 2–3) and "Survival" (cols 4–5)
-   for the 3-IV grouping table, with a gap in the middle. */
+/* Short group lines for grouped 3-IV tables */
 .tt-threeiv-grouping table.tinytable thead tr:nth-child(2) th:nth-child(2)::after,
 .tt-threeiv-grouping table.tinytable thead tr:nth-child(2) th:nth-child(3)::after {
   content: "";
@@ -1221,31 +1249,31 @@ table.tinytable thead tr:first-child th {
   border-bottom: 0.5px solid #e1e2ea;
 }
 
-/* fine-tune the gap: trim right edge of the left segment, left edge of the right segment */
 .tt-threeiv-grouping table.tinytable thead tr:nth-child(2) th:nth-child(2)::after {
-  margin: 0.5em 0.8em 0 0.2em;   /* more margin on the right → gap near centre */
+  margin: 0.5em 0.8em 0 0.2em;
 }
 
 .tt-threeiv-grouping table.tinytable thead tr:nth-child(2) th:nth-child(3)::after {
-  margin: 0.5em 0.2em 0 0.8em;   /* more margin on the left → same gap from other side */
+  margin: 0.5em 0.2em 0 0.8em;
 }
 
-
-
-/* Line below the model-header row */
-.tt-oneiv  table.tinytable thead tr:last-child th,
-.tt-oneiv-nogof  table.tinytable thead tr:last-child th,
-.tt-twoiv  table.tinytable thead tr:last-child th,
-.tt-twoiv-nogof  table.tinytable thead tr:last-child th,
+/* Line below model header */
+.tt-oneiv table.tinytable thead tr:last-child th,
+.tt-oneiv-nogof table.tinytable thead tr:last-child th,
+.tt-twoiv table.tinytable thead tr:last-child th,
+.tt-twoiv-nogof table.tinytable thead tr:last-child th,
 .tt-threeiv table.tinytable thead tr:last-child th,
-.tt-threeiv-grouping table.tinytable thead tr:last-child th{
+.tt-threeiv-nogof table.tinytable thead tr:last-child th,
+.tt-sixiv table.tinytable thead tr:last-child th,
+.tt-sixiv-nogof table.tinytable thead tr:last-child th,
+.tt-threeiv-grouping table.tinytable thead tr:last-child th {
   border-bottom: 0.5px solid #e1e2ea !important;
 }
 
 
 /* ===== Body rules per-IV layout ===== */
 
-/* 1-IV layout */
+/* 1-IV */
 .tt-oneiv table.tinytable tbody tr:nth-child(4) td {
   border-bottom: 0.5px solid #e1e2ea !important;
 }
@@ -1253,7 +1281,7 @@ table.tinytable thead tr:first-child th {
   border-bottom: 2px solid #e1e2ea !important;
 }
 
-/* 1-IV without GOF layout */
+/* 1-IV without GOF */
 .tt-oneiv-nogof table.tinytable tbody tr:nth-child(4) td {
   border-bottom: 0.5px solid #e1e2ea !important;
 }
@@ -1261,7 +1289,7 @@ table.tinytable thead tr:first-child th {
   border-bottom: 2px solid #e1e2ea !important;
 }
 
-/* 2-IV layout */
+/* 2-IV */
 .tt-twoiv table.tinytable tbody tr:nth-child(6) td {
   border-bottom: 0.5px solid #e1e2ea !important;
 }
@@ -1269,12 +1297,15 @@ table.tinytable thead tr:first-child th {
   border-bottom: 2px solid #e1e2ea !important;
 }
 
-/* 2-IV without GOF layout */
+/* 2-IV without GOF */
 .tt-twoiv-nogof table.tinytable tbody tr:nth-child(6) td {
+  border-bottom: 0.5px solid #e1e2ea !important;
+}
+.tt-twoiv-nogof table.tinytable tbody tr:nth-child(7) td {
   border-bottom: 2px solid #e1e2ea !important;
 }
 
-/* 3-IV layout */
+/* 3-IV */
 .tt-threeiv table.tinytable tbody tr:nth-child(8) td {
   border-bottom: 0.5px solid #e1e2ea !important;
 }
@@ -1282,7 +1313,15 @@ table.tinytable thead tr:first-child th {
   border-bottom: 2px solid #e1e2ea !important;
 }
 
-/* 3-IV with grouping layout */
+/* 3-IV without GOF */
+.tt-threeiv-nogof table.tinytable tbody tr:nth-child(8) td {
+  border-bottom: 0.5px solid #e1e2ea !important;
+}
+.tt-threeiv-nogof table.tinytable tbody tr:nth-child(9) td {
+  border-bottom: 2px solid #e1e2ea !important;
+}
+
+/* 3-IV with grouping */
 .tt-threeiv-grouping table.tinytable tbody tr:nth-child(8) td {
   border-bottom: 0.5px solid #e1e2ea !important;
 }
@@ -1290,7 +1329,21 @@ table.tinytable thead tr:first-child th {
   border-bottom: 2px solid #e1e2ea !important;
 }
 
+/* 6-IV */
+.tt-sixiv table.tinytable tbody tr:nth-child(14) td {
+  border-bottom: 0.5px solid #e1e2ea !important;
+}
+.tt-sixiv table.tinytable tbody tr:nth-child(17) td {
+  border-bottom: 2px solid #e1e2ea !important;
+}
 
+/* 6-IV without GOF */
+.tt-sixiv-nogof table.tinytable tbody tr:nth-child(14) td {
+  border-bottom: 0.5px solid #e1e2ea !important;
+}
+.tt-sixiv-nogof table.tinytable tbody tr:nth-child(15) td {
+  border-bottom: 2px solid #e1e2ea !important;
+}
 
 /* ----------------------------------------
    Delayed (date-restricted) inline links
