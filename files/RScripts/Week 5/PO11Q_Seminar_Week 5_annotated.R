@@ -248,23 +248,6 @@ EU_pop_large <- filter(EU, pop18 > 10000000)
 # is greater than 10,000,000, and stores them in a new data frame "EU_pop_large".
 
 
-########################################################
-# Operators table (used for documentation in the worksheet)
-########################################################
-
-geometry <- read.csv("files/Week 5/operators.csv")
-# This reads the CSV file "operators.csv" from the specified folder into an object
-# called "geometry" as a data frame.
-
-knitr::kable(
-  geometry,
-  format = "pipe",
-  escape = FALSE
-)
-# This formats the "geometry" data frame as a markdown table (pipe format),
-# suitable for inclusion in a Quarto/knitr document, and allows LaTeX-style expressions
-# by setting escape = FALSE.
-
 
 ############################
 # Ordering (sorting) data
