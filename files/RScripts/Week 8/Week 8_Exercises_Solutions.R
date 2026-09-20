@@ -8,401 +8,975 @@ rm(list=ls())
 
 setwd()
 
-library(haven)
+# *****************************************************************
+# SETUP AND PACKAGES
+# *****************************************************************
 library(tidyverse)
+library(haven)
+
+# *****************************************************************
+# GRAPH FORMATTING
+# *****************************************************************
+
+# Graph theme
+theme_iqmss <- theme_classic() +
+  theme(text = element_text(family = "sans"),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        axis.text.x = element_text(margin = margin(b = 10, t=9)),
+        axis.title.y = element_text(margin = margin(r = 12)),
+        legend.title = element_text(size = 24), 
+        legend.text = element_text(size = 12),
+        plot.title = element_text(size = 24),
+        axis.ticks.length=unit(.1, "cm")) +
+  theme(
+    panel.background = element_rect(fill = 'transparent'),
+    plot.background = element_rect(fill = 'transparent', color = NA),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.background = element_rect(fill = 'transparent', color = NA),
+    legend.box.background = element_rect(fill = 'transparent', color = NA)
+  )
+# Graph theme (with math notation)
+theme_iqmss_math <- theme_classic() +
+  theme(text = element_text(family = "sans"),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        axis.text.x = element_text(margin = margin(b = 10, t=9)),
+        axis.title.y = element_text(margin = margin(r = 12)),
+        legend.title = element_text(size = 24), 
+        legend.text = element_text(size = 12),
+        plot.title = element_text(size = 22),
+        axis.ticks.length=unit(.1, "cm")) +
+  theme(
+    panel.background = element_rect(fill = 'transparent'),
+    plot.background = element_rect(fill = 'transparent', color = NA),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.background = element_rect(fill = 'transparent', color = NA),
+    legend.box.background = element_rect(fill = 'transparent', color = NA)
+  )
+
+
+# *****************************************************************
+# LOAD DATA
+# *****************************************************************
+
+# The data are supplied as an SPSS file. The haven package reads .sav
+# files. SPSS variables are often imported as labelled variables, so
+# we use as.numeric() when we need ordinary numbers for calculations.
+
+afro <- read_sav(file.path(RAW, "Afrobarometer.sav"))
+
+# Look at the data before beginning.
+head(afro)
+nrow(afro)
+ncol(afro)
+
+# *****************************************************************
+# EXERCISE 1
+# *****************************************************************
+
+# Q4A records the present economic condition of the country:
+# 1 = Very bad
+# 2 = Fairly bad
+# 3 = Neither good nor bad
+# 4 = Fairly good
+# 5 = Very good
+#
+# Values outside 1-5 are missing or non-substantive responses.
+
+# --- (a) Filter the data for Kenya -------------------------------
+
+kenya <- afro |>
+  filter(COUNTRY == 16)
+
+kenya <- kenya |>
+  mutate(Q4A = as.numeric(Q4A))
+
+kenya <- kenya |>
+  filter(Q4A >= 1 & Q4A <= 5)
+
+head(kenya)
+table(kenya$Q4A)
+
+# --- (b) Frequency table ------------------------------------------
+
+# Give the five response categories readable labels.
+q4a_labels <- c(
+  "Very bad", "Fairly bad", "Neither",
+  "Fairly good", "Very good"
+)
+
+# Convert Q4A into a factor with all five categories.
+# .drop = FALSE tells count() to keep categories with zero responses.
+kenya <- kenya |>
+  mutate(
+    Q4A = factor(
+      Q4A,
+      levels = 1:5,
+      labels = q4a_labels
+    )
+  )
 
-fearon <- read_dta("fearon.dta")
-fearonfull <- read_dta("fearonfull.dta")
+# Count the responses and calculate the relative frequency.
+freq_kenya <- kenya |>
+  count(Q4A, .drop = FALSE)
 
-#1. 	Produce a new data frame of df1, df2, df3, df4. For each dataset, arrange them according to countries with:
-#a.	Lowest Ethnic Fractionalisation
-#b.	Highest Population
-#c.	Highest mountainous terrain
-#d.	Lowest elevation
+freq_kenya
 
-df1<-arrange(fearon, ef)
+# Calculate the total number of valid responses.
+total_kenya <- sum(freq_kenya$n)
+total_kenya
 
-df2<-arrange(fearon, desc(pop))
+# Calculate the probability of each response category.
+freq_kenya <- freq_kenya |>
+  mutate(probability = n / total_kenya)
 
-df3<-arrange(fearon, desc(mtnest))
+freq_kenya
 
-df4<-arrange(fearon, elevdiff)
+# Check that the probabilities add up to 1.
+sum(freq_kenya$probability)
 
-####################################################################
-# BASE R
-####################################################################
-# df1 <- fearon[order(fearon$ef),]
-# df2 <- fearon[order(-fearon$pop),]
-# df3 <- fearon[order(-fearon$mtnest),]
-# df4 <- fearon[order(fearon$elevdiff),]
-####################################################################
+# --- (c) Bar chart -------------------------------------------------
 
+kenya_plot <- ggplot(
+  freq_kenya,
+  aes(x = Q4A, y = probability)
+) +
+  geom_col(fill = "#e57726", width = 0.6) +
+  labs(
+    x = "Economic Condition",
+    y = "Probability",
+    title = "Economic Condition of the Country (Kenya)"
+  ) +
+  theme_iqmss
 
-#2. Create a dataframe which looks upon countries that used to be British colonies. Transform the British colony variable into a binary dummy of “No” and “Yes”. 
+kenya_plot
 
+# Very bad is the talles bar, but if you want to find this with R:
+highest_kenya_probability <- max(freq_kenya$probability)
+highest_kenya_probability
 
-fearon$brit = factor(fearon$colbrit)
+# Find the category or categories with that probability.
+highest_kenya_category <- freq_kenya |>
+  filter(probability == highest_kenya_probability)
 
-fearon <- fearon %>%
-   mutate(british = recode(brit, '0'="No", 
-                                 '1'= "Yes"))
+highest_kenya_category
 
-####################################################################
-# BASE R
-####################################################################
-# fearon$british <- as.factor(ifelse(fearon$brit == 0, 'No', 'Yes'))
-####################################################################
+# --- (d) Very bad OR Fairly bad -------------------------------
 
+# add the relative frequencies together from 
 
-table(fearon$british)
+freq_kenya
+0.627 + 0.238 
 
+# Or if you want to use R: Select the two relevant rows.
+bad_categories <- freq_kenya |>
+  filter(Q4A %in% c("Very bad", "Fairly bad"))
 
-#3.If we order all countries by population size, what is the population size at the 40th percentile?
+bad_categories
 
-quantile(fearon$pop, probs = 0.4)
+# Add their probabilities together.
+sum(bad_categories$probability)
 
 
+# --- (e) Repeat the frequency table for Nigeria -------------------
 
-#4. Make a dummy variable which shows whether or not a country is majority Muslim, given that the requirement of a majority Muslim country is more than 50% of its population. Do not forget to order the factors.
-#a. Use cut()
-#b. Use ifelse()
+nigeria <- afro |>
+  filter(COUNTRY == 28)
 
-#a
-fearon2 <- fearon %>% 
-   mutate(muslimcoun=ordered(
-      cut(muslim, breaks=c(-0.1, 50, 101),labels=c("No","Yes"))))
+nigeria <- nigeria |>
+  mutate(Q4A = as.numeric(Q4A))
 
-fearon2$muslimcoun <-factor(fearon2$muslimcoun ,levels =c("Yes", "No"))
+nigeria <- nigeria |>
+  filter(Q4A >= 1 & Q4A <= 5)
 
-table(fearon2$muslimcoun)
+# Use the same labels and factor levels as for Kenya.
+nigeria <- nigeria |>
+  mutate(
+    Q4A = factor(
+      Q4A,
+      levels = 1:5,
+      labels = q4a_labels
+    )
+  )
 
-#b
-fearon3 <- fearon %>% 
-   mutate(muslimcoun = factor(ifelse(muslim>50, "Yes", "No"), 
-                              levels =c("Yes", "No")))
+freq_nigeria <- nigeria |>
+  count(Q4A, .drop = FALSE)
 
+freq_nigeria
 
-###########################################################################
-# BASE R
-###########################################################################
-# fearon$muslimcoun <- as.factor(ifelse(fearon$muslim <= 50, 'No', 'Yes'))
+total_nigeria <- sum(freq_nigeria$n)
+total_nigeria
 
-# fearon$muslimcoun <-factor(fearon$muslimcoun ,levels =c("Yes", "No"))
-###########################################################################
+freq_nigeria <- freq_nigeria |>
+  mutate(probability = n / total_nigeria)
 
+freq_nigeria
+sum(freq_nigeria$probability)
 
-table(fearon3$muslimcoun)
+# Compare the two probability distributions.
+# Either call these separately
+freq_nigeria
+freq_kenya
 
+# Or join these together for a more elegant solution
+comparison_q4a <- freq_kenya |>
+  select(Q4A, probability_kenya = probability) |>
+  left_join(
+    freq_nigeria |>
+      select(Q4A, probability_nigeria = probability),
+    by = "Q4A"
+  )
 
-#5. The Polity IV score measures democracy on a scale from -10 to +10 where -10 is equal to perfect autocracy and +10 equal to perfect democracy. Often, the democratisation literature distinguishes between autocracies, anocracies and democracies. We can achieve this differentiation in the Polity IV score as follows...
-# a. Into an ordered factor
-# b. Into a binary dummy variable – Democracy/Non-Democracy
+comparison_q4a
 
-fearon_polity <- fearon%>%mutate(polity_order=
-                                    ordered(cut
-                                            (polity2, breaks=c(-10.5, -5.5, 5.5, 10.5),
-                                               labels=c("Autocracies","Anocracies","Democracies"))))
+# Even though these are probability distributions for two different countries, they are very similar. 
 
 
-table(fearon_polity$polity_order)
+# *****************************************************************
+# EXERCISE 2
+# *****************************************************************
 
-##################################################################################
-# BASE R
-##################################################################################
-# fearon$polity_order <- as.factor(ifelse(fearon$polity2 <= -5.5, 'Autocracies',
-# ifelse(fearon$polity2 <= 5.5, 'Anocracies', 'Democracies')))
+# Q1 records respondent age. For this exercise, age is treated as a
+# continuous variable.
 
-# table(fearon$polity_order)
-##################################################################################
+# --- (a) Select valid ages -----------------------------------------
 
+age <- afro |>
+  mutate(Q1 = as.numeric(Q1))
 
-fearon_polity1 <- fearon_polity %>%
-   mutate(democracy = recode(polity_order, "Democracies"="Yes",
-                                          "Autocracies" = "No",
-                                          "Anocracies" = "No"))
-table(fearon_polity1$democracy)
+# Valid ages are between 18 and 112. Other values are removed.
+age <- age |>
+  filter(Q1 >= 18 & Q1 <= 112)
 
+head(age)
+summary(age$Q1)
 
-#################################################################################################
-# BASE R
-#################################################################################################
-# fearon$democracy <- as.factor(ifelse(fearon$polity_order == 'Democracies', 'Yes', 'No'))
+# --- (b) Mean and standard deviation -------------------------------
 
-# table(fearon$democracy)
-#################################################################################################
+mu_age <- mean(age$Q1)
+sd_age <- sd(age$Q1)
 
+mu_age
+sd_age
 
+# --- (c) Histogram and density curve -------------------------------
 
-#6.	Find the mean difference between: 
-# a. the share of largest ethnic group and second largest ethnic group
-fearon$diffshare <- fearon$plural-fearon$second
-mean(fearon$diffshare, na.rm=TRUE)
+ggplot(age, aes(x = Q1)) +
+  geom_histogram(
+    aes(y = after_stat(density)),
+    bins = 40,
+    colour = "#e57726",
+    fill = "#e57726",
+    alpha = 0.7
+  ) +
+  geom_density(colour = "#8a1e00", linewidth = 0.8) +
+  labs(
+    x = "Age",
+    y = "Density",
+    title = "Distribution of Respondent Age (All Countries)"
+  ) +
+  theme_iqmss
 
-# b. the share of largest ethnic group and second largest ethnic group within former British colonies (using previous exercise no. 4)
-fearon_brit <- filter(fearon, british=="Yes")
-fearon_brit$diffeth <- fearon_brit$plural-fearon_brit$second
-mean(fearon_brit$diffeth, na.rm=TRUE)
 
-#7. a. Create an age-group dataframe like the following; 
-#   Age Group
-#   **********
-#    NA
-#    0-18
-#    18-35
-#    35-50
-#    50-70
-#b. Transform the values into numeric values, and separate into a lower and upper category
-#c. Create a column - Find the mid of each levels
-#d. Create a column - Find the interval of each levels
+# The distribution is heavily right-skewed as a large proportion of the population is young, and there are only few very old people.
 
-agegroup <- data.frame(x = c(NA, "0-18", "18-35", "35-50", "50-70")) 
+# --- (d) Probability of age between 25 and 45 ----------------------
 
-agegroup %>%
-separate(x, c("lower", "upper"), 
-           sep="-", remove = FALSE) -> agegroup
+# pnorm() gives the area to the LEFT of a value.
+prob_age_at_most_45 <- pnorm(
+  45,
+  mean = mu_age,
+  sd = sd_age
+)
 
+prob_age_at_most_25 <- pnorm(
+  25,
+  mean = mu_age,
+  sd = sd_age
+)
 
-###################################################################################
-# BASE R
-###################################################################################
-# Split the "x" column on "-" using strsplit
-# splits <- strsplit(as.character(agegroup$x), "-")
+prob_age_at_most_45
+prob_age_at_most_25
 
-# Extract lower and upper bounds safely
-# agegroup$lower <- sapply(splits, function(z) if (length(z) >= 1) z[1] else NA)
-# agegroup$upper <- sapply(splits, function(z) if (length(z) >= 2) z[2] else NA)
-###################################################################################
+# Subtract the two areas to get the area between 25 and 45.
+p_25_45 <- prob_age_at_most_45 - prob_age_at_most_25
+p_25_45
 
+# The probability of finding a respondent between 25 and 45 years old is 48.59%.
 
-agegroup$lower <- as.numeric(as.character(agegroup$lower))
-agegroup$upper <- as.numeric(as.character(agegroup$upper))
 
-agegroup$mid <- (agegroup$lower + agegroup$upper)/2
+# *****************************************************************
+# EXERCISE 3
+# *****************************************************************
 
+# We continue using the mean and standard deviation of age.
 
-#8. For this exercise use the data frame `fearonfull` which contains data for all years between 1945 and 1999. Population is defined in terms of 1000s. 
-#a.  Create a new data which consists of countries with more than 10000000 people.  (large population)
-#b.  Find the average of population of each large population country from 1945-1999. Hint: group according to country, then find the mean
+# --- (a) Probability of being older than 60 ------------------------
 
-fearonpop <- filter(fearonfull, pop > 10000)
-fearonpop1 <- fearonpop %>%
-   group_by(country) %>%
-   summarise(avgpop=mean(pop))
+prob_age_at_most_60 <- pnorm(
+  60,
+  mean = mu_age,
+  sd = sd_age
+)
 
-###########################################################################
-# BASE R
-###########################################################################
-# fearonpop <- fearonfull[fearonfull$pop > 10000,]
-# fearonpop1 = aggregate(fearonpop$pop, list(fearonpop$country), mean)
-###########################################################################
+prob_age_at_most_60
 
-fearonpop1
+# The probability above 60 is the area remaining after the area below 60.
+p_gt_60 <- 1 - prob_age_at_most_60
+p_gt_60
 
+# This probability is small, at 7.2%.
 
-#9. Sub-setting data, using the 'fearonfull' data frame:
-#a. Extract the necessary variables to compare the social fractionalization between countries
-#b. Retain the last row of the dataset
-#c. Filter the dataset with only countries in an ongoing war (variable=ended)
-#d. Find the country with ongoing war in 1999.
+# --- (b) Confirm using a z-score -----------------------------------
 
-a <- select(fearonfull, c(ef, plural, second, relfrac, plurrel, minrelpc))
+z_60 <- (60 - mu_age) / sd_age
+z_60
 
-b <- slice(fearonfull,n())
+# The z-table gives a right-tail probability of 0.0721 which is slightly higher than the value we obtained from R, because R uses the precise values. The values in the table are rounded. 
 
-c <- filter(fearonfull, ended==0)
-c
+# --- (c) Younger than 25 -------------------------------------------
 
-d <- fearonfull %>% filter(year==1999 & ended==0) %>% select(country)
-d
+p_lt_25 <- pnorm(
+  25,
+  mean = mu_age,
+  sd = sd_age
+)
 
-############################################################################################
-# BASE R
-############################################################################################
-# a <- subset(fearonfull, select = c(ef, plural, second, relfrac, plurrel, minrelpc))
+p_lt_25
 
-# b <- fearonfull[c(nrow(fearonfull)),]
+# The probability that a randomly selected respondent is younger than 25 is 19.27%.
 
-# c <- fearonfull[fearonfull$ended == 0,]
+# --- (d) Between 30 and 50 ----------------------------------------
 
-# d1 <- fearonfull[fearonfull$year == 1999 & fearonfull$ended == 0,]
-# d <- subset(d1, select = c(country))
-############################################################################################
+prob_age_at_most_50 <- pnorm(
+  50,
+  mean = mu_age,
+  sd = sd_age
+)
 
+prob_age_at_most_30 <- pnorm(
+  30,
+  mean = mu_age,
+  sd = sd_age
+)
 
-#10. Find all countries with gdp per capita greater than the world's mean in 1999 (you need to use `fearonfull` again).
+prob_age_at_most_50
+prob_age_at_most_30
 
-meangdp <- filter(fearonfull, year==1999)
-meangdp1 <- meangdp %>% filter (gdpen>mean(meangdp$gdpen,  na.rm=TRUE)) %>% select(country)
+p_30_50 <- prob_age_at_most_50 - prob_age_at_most_30
+p_30_50
 
+# The probability that a randomly selected respondent is between 30 and 50 years old is 49.09%. 
 
-###########################################################################
-# BASE R
-###########################################################################
-# Subset rows where year is 1999
-# meangdp <- fearonfull[fearonfull$year == 1999, ]
+# --- (e) Oldest 5% -------------------------------------------------
 
-# Calculate mean GDP (excluding NA)
-# mean_gdpen <- mean(meangdp$gdpen, na.rm = TRUE)
+# The oldest 5% begin at the 95th percentile.
+age_95 <- qnorm(
+  0.95,
+  mean = mu_age,
+  sd = sd_age
+)
 
-# Filter countries with gdpen > mean, then select only 'country' column
-# meangdp1 <- meangdp[meangdp$gdpen > mean_gdpen, "country", drop = FALSE]
-# drop = FALSE ensures meangdp1 stays a data frame (like select(country)).
-###########################################################################
+age_95
 
+# The oldest 5% of the population are older than 62.74 years.
 
 
+# *****************************************************************
+# EXERCISE 4
+# *****************************************************************
 
-#11. Generate a dataframe that only consist of data from 1998 and 1999. Change the data format into a wide data using spread for the observations of gdp per capita (you need to use `fearonfull` again).
+# Q4B records respondents' own present living conditions:
+# 1 = Very bad and 5 = Very good.
+# We use South Africa, COUNTRY == 33.
 
-fearon4 <- filter(fearonfull, year == 1998| year==1999)
-fearon4_spread <- spread (fearon4, year, gdpen)
+# --- (a) South African Q4B data -----------------------------------
 
+sa <- afro |>
+  filter(COUNTRY == 33)
 
-##########################################################################################
-# BASE R
-##########################################################################################
-# Step 1: Subset rows where year is 1998 or 1999
-# fearon4 <- subset(fearonfull, year == 1998 | year == 1999)
+sa <- sa |>
+  mutate(Q4B = as.numeric(Q4B))
 
-# Step 2: Reshape to wide format — spread 'year' to columns, with 'gdpen' values
-# You must specify id variables (what defines each country uniquely)
-# fearon4_spread <- reshape(fearon4[, c("country", "year", "gdpen")],
-#                           timevar = "year",
-#                           idvar = "country",
-#                           direction = "wide")
-##########################################################################################
+sa <- sa |>
+  filter(Q4B >= 1 & Q4B <= 5)
 
+mu_sa <- mean(sa$Q4B)
+sd_sa <- sd(sa$Q4B)
 
+mu_sa
+sd_sa
 
+# --- (b) z-score for a rating of 5 -------------------------------
 
-#12. Generate a data consisting of list of countries and its population in 1945 and 1995
-#Find the mean of population differences between 1945 and 1995 (you need to use `fearonfull` again).
+rating_5 <- 5
 
-fearon5 <- filter(fearonfull, year == 1945| year == 1995)
+z_5 <- (rating_5 - mu_sa) / sd_sa
+z_5
 
-fearon5_a <- fearon5 %>%
-      group_by(country) %>%
-    summarise(difference=diff(pop))
+# The z-score means that the rating of 5 is 1.58 standard deviations above the mean of South Africa.
 
 
-##########################################################################################
-# BASE R
-##########################################################################################
-# fearon5 <- fearonfull[fearonfull$year == 1945 | fearonfull$year == 1995,]
+# --- (c) z-score for a rating of 1 -------------------------------
 
-# First, ensure the data is sorted properly (e.g., by country and year)
-# fearon5 <- fearon5[order(fearon5$country, fearon5$year), ]
+rating_1 <- 1
 
-# Use reshape to wide format
-# wide_data <- reshape(fearon5[, c("country", "pop")],
-#                      idvar = "country", timevar = "time", direction = "wide")
+z_1 <- (rating_1 - mu_sa) / sd_sa
+z_1
 
-# Then calculate the difference directly
-# fearon5_a <- data.frame(
-#   country = wide_data$country,
-#   difference = wide_data[, 3] - wide_data[, 2]
-# )
-##########################################################################################
+# The z-score means that the rating of 1 is 1.27 standard deviations below the mean of South Africa.
 
+# --- (d) Right-tail probabilities ---------------------------------
 
-#13. Find the oil-producing country (Oil=1) with the highest mean of gdp per capita over the years (you need to use `fearonfull` again).
+# pnorm() with a z-score uses the standard normal distribution.
+prob_below_5 <- pnorm(z_5)
+prob_below_5
 
-fearon6 <- filter(fearonfull, Oil==1)
+prob_above_5 <- 1 - prob_below_5
+prob_above_5
 
-fearon_gdp <- fearon6 %>% 
-   group_by(country) %>% 
-   summarize (meangdpen=mean(gdpen)) %>% 
-   arrange(desc(meangdpen))
+# Only 5.7% of South Africans enjoy very good living conditions.  
 
-##########################################################################################
-# BASE R
-##########################################################################################
-# fearon6 <- fearonfull[fearonfull$Oil == 1,]
-# meangdpen1 = aggregate(fearonfull$gdpen, list(fearonfull$country), mean)
-##########################################################################################
+prob_below_1 <- pnorm(z_1)
+prob_below_1
 
-fearon_gdp
+prob_above_1 <- 1 - prob_below_1
+prob_above_1
 
+# 89.83% of South Africans have better than "very bad" living conditions.  
 
+# *****************************************************************
+# EXERCISE 5
+# *****************************************************************
 
-#14. For this exercise use the `fearonfull` data set.
-#a. Check how many missing values are in the dataset
-#b. Omit rows with missing values in gdp per capita and population using filter
+# Q6E records how often respondents have gone without a cash income:
+# 0 = Never, 1 = Just once or twice, 2 = Several times,
+# 3 = Many times, 4 = Always.
+# We use Ghana, COUNTRY == 14.
 
-sum(is.na(fearonfull))
-sum(is.na(fearonfull$polity2))
+# --- (a) Ghana Q6E data --------------------------------------------
 
-fearon8 <- filter(fearonfull, !is.na(gdpen), !is.na(pop))
+ghana <- afro |>
+  filter(COUNTRY == 14)
 
-##########################################################################################
-# BASE R
-##########################################################################################
-# MISSING <- is.na(fearonfull$gdpen) | is.na(fearonfull$pop)
-# fearon8 <- subset(fearonfull, subset = !MISSING)
-##########################################################################################
+ghana <- ghana |>
+  mutate(Q6E = as.numeric(Q6E))
 
+ghana <- ghana |>
+  filter(Q6E >= 0 & Q6E <= 4)
 
-#15. Use the data in exercise number 13.
-#a. Summarize the mean of gdp per capita and population per country over the years. Find the mean gdp per country
-#b. Filter the top 10 highest gdp countries
+mu_ghana <- mean(ghana$Q6E)
+sd_ghana <- sd(ghana$Q6E)
 
-fearon8_b <- fearon8 %>% 
-   group_by(country) %>% 
-   summarize (meangdp=mean(gdpen), meanpop=mean(pop), gdp=meangdp*meanpop)
+mu_ghana
+sd_ghana
 
-fearon_border <- fearon8_b %>% 
-   arrange(desc(gdp)) %>% 
-   slice(1:10)
+# --- (b) z-score for a value of 3 -------------------------------
 
-##########################################################################################
-# BASE R
-##########################################################################################
-# Step 1: Calculate group-wise means for gdpen and pop
-# meangdp <- aggregate(gdpen ~ country, data = fearon8, FUN = mean)
-# meanpop <- aggregate(pop ~ country, data = fearon8, FUN = mean)
+value_3 <- 3
 
-# Step 2: Merge the two summaries
-# fearon8_b <- merge(meangdp, meanpop, by = "country")
+z_3 <- (value_3 - mu_ghana) / sd_ghana
+z_3
 
-# Step 3: Calculate gdp = meangdp * meanpop
-# fearon8_b$gdp <- fearon8_b$gdpen * fearon8_b$pop
+# --- (c) Probability of a score higher than 3 --------------------
 
-# Step 4: Sort in descending order of gdp
-# fearon_border <- fearon8_b[order(-fearon8_b$gdp), ]
+prob_at_most_3 <- pnorm(z_3)
+prob_at_most_3
 
-# Step 5: Select top 10 rows
-# fearon_border <- head(fearon_border, 10)
-##########################################################################################
+p_gt_3 <- 1 - prob_at_most_3
+p_gt_3
 
+# The probability that a randomly selected Ghanaian respondent has a 
+# score higher than 3 on this variable is 16.75%.
 
-fearon_border
 
+# --- (d) Probability of a score between 1 and 3 ------------------
 
+value_1 <- 1
 
+z_1_ghana <- (value_1 - mu_ghana) / sd_ghana
+z_1_ghana
 
-#16. Find the difference between each country's largest ethnic group and second largest ethnic group in 1994. Arrange the countries in ascending order based on the difference
+prob_at_most_z3 <- pnorm(z_3)
+prob_at_most_z1 <- pnorm(z_1_ghana)
 
-fearon$diffshare <- fearon$plural-fearon$second
+prob_at_most_z3
+prob_at_most_z1
 
-fearon_diff <-  fearon %>% 
-   arrange(diffshare)
+p_1_to_3 <- prob_at_most_z3 - prob_at_most_z1
+p_1_to_3
 
-##########################################################################################
-# BASE R
-##########################################################################################
-# fearon_diff <- fearon[order(fearon$diffshare),]
-##########################################################################################
+# The probability that a randomly selected Ghanaian respondent has a 
+# score between 1 and 3 on this variable is 56.81%.
 
-fearon_diff
+# --- (e) Histogram -----------------------------------------------
 
-#17. Using the data in exercise 16, save the dataframes as:
-#a. CSV to be read in excel
-#b. DTA file 
-#c. R Data
+ggplot(ghana, aes(x = Q6E)) +
+  geom_histogram(
+    aes(y = after_stat(density)),
+    bins = 5,
+    colour = "#e57726",
+    fill = "#e57726",
+    alpha = 0.7,
+    boundary = -0.5
+  ) +
+  labs(
+    x = "Gone without cash income",
+    y = "Density",
+    title = "Distribution of Q6E (Ghana)"
+  ) +
+  theme_iqmss
 
-write.csv(fearon_diff, file = "fearon")
-write_dta(fearon_diff, "fearon.dta")
-save(fearon_diff, file = "fearon.RData")
+# Q6E is discrete and has only five possible values. A normal model is
+# therefore not a particularly reasonable description of this variable.
+# A discrete probability distribution as in Exercise 1 would be more 
+# appropriate here.
 
 
+# *****************************************************************
+# EXERCISE 6
+# *****************************************************************
 
+# --- (a) Calculate the country-level means ------------------------
+
+q4b_valid <- afro |>
+  mutate(Q4B = as.numeric(Q4B))
+
+q4b_valid <- q4b_valid |>
+  filter(Q4B >= 1 & Q4B <= 5)
+
+country_means <- q4b_valid |>
+  group_by(COUNTRY)
+
+country_means <- country_means |>
+  summarise(
+    mean_Q4B = mean(Q4B),
+    .groups = "drop"
+  )
+
+country_means
+
+# --- (b) Number of observations -----------------------------------
+
+number_of_countries <- nrow(country_means)
+number_of_countries
+
+# --- (c) Mean and standard deviation ------------------------------
+
+mu_pop <- mean(country_means$mean_Q4B)
+mu_pop
+
+# sd() uses the sample formula and divides by N - 1.
+sd_country_means_sample_formula <- sd(country_means$mean_Q4B)
+sd_country_means_sample_formula
+
+# Here we treat the 39 countries as the complete population. Therefore,
+# calculate sigma using N in the denominator.
+
+deviations_from_mean <- country_means$mean_Q4B - mu_pop
+squared_deviations <- deviations_from_mean^2
+sum_squared_deviations <- sum(squared_deviations)
+
+sig_pop <- sqrt(
+  sum_squared_deviations / number_of_countries
+)
+
+sig_pop
+
+# --- (d) Plot the country means ------------------------------------
+
+ggplot(country_means, aes(x = mean_Q4B)) +
+  geom_histogram(
+    aes(y = after_stat(density)),
+    bins = 10,
+    colour = "#e57726",
+    fill = "#e57726",
+    alpha = 0.7
+  ) +
+  geom_density(colour = "#8a1e00", linewidth = 0.8) +
+  labs(
+    x = "Mean Living Conditions Score",
+    y = "Density",
+    title = "Distribution of Country-Level Means (Q4B)"
+  ) +
+  theme_iqmss
+
+# With a little goodwill, this can be described as approximately normal. 
+# There is a notable right-skew, however. 
+
+# --- (e) z-score and probability above 3.5 ------------------------
+
+hypothetical_mean <- 3.5
+
+z_35 <- (hypothetical_mean - mu_pop) / sig_pop
+z_35
+
+prob_country_at_most_35 <- pnorm(
+  hypothetical_mean,
+  mean = mu_pop,
+  sd = sig_pop
+)
+
+prob_country_at_most_35
+
+p_gt_35 <- 1 - prob_country_at_most_35
+p_gt_35
+
+# The probability of observing such a country is very small at only 0.6%.
+
+# *****************************************************************
+# EXERCISE 7
+# *****************************************************************
+
+# --- (a) Population parameters ------------------------------------
+
+# You should still have these results from Exercise 2b. If not, then this is the code:
+
+age <- afro |>
+  mutate(Q1 = as.numeric(Q1))
+
+# Valid ages are between 18 and 112. Other values are removed.
+age <- age |>
+  filter(Q1 >= 18 & Q1 <= 112)
+
+mu_age <- mean(age$Q1)
+sd_age <- sd(age$Q1)
+
+mu_age
+sd_age
+
+
+# --- (b) 5,000 samples of size 50 -------------------------------
+
+set.seed(42)
+
+n_sims <- 5000
+n_size <- 50
+
+# Create an empty vector to store the sample means.
+sample_means_50 <- numeric(n_sims)
+
+# Repeat the following steps 5,000 times:
+# 1. Draw a random sample of 50 ages.
+# 2. Calculate its mean.
+# 3. Store the mean in sample_means_50.
+
+for (i in 1:n_sims) {      #1.
+  one_sample <- sample(
+    pop_age,
+    size = n_size,
+    replace = TRUE
+  )
+  one_sample_mean <- mean(one_sample)     #2.
+  sample_means_50[i] <- one_sample_mean   #3.
+}
+
+head(sample_means_50)
+length(sample_means_50) # this needs to be 5000, as we drew 5000 samples
+
+# --- (c) Plot the sample means ------------------------------------
+
+# Store the sample means in their own data frame for ggplot
+sample_means_50_data <- data.frame(
+  sample_mean = sample_means_50
+)
+
+ggplot(
+  sample_means_50_data,
+  aes(x = sample_mean)
+) +
+  geom_histogram(
+    aes(y = after_stat(density)),
+    bins = 40,
+    colour = "#e57726",
+    fill = "#e57726",
+    alpha = 0.7
+  ) +
+  geom_density(colour = "#8a1e00", linewidth = 0.8) +
+  labs(
+    x = "Sample Mean Age",
+    y = "Density",
+    title = "Sampling Distribution of the Mean (n = 50)"
+  ) +
+  theme_iqmss
+
+# This is a normal distribution, as per the central limit theorem, the sample
+# size of each sample exceeds 30
+
+
+# --- (d) Mean and standard deviation ------------------------------
+
+mean_sampling_distribution_50 <- mean(sample_means_50)
+sd_sampling_distribution_50 <- sd(sample_means_50)
+
+mean_sampling_distribution_50
+mu_age
+
+# These are very close to one another, but not identical, this would only happen 
+# if we drew an infinite number of samples.
+
+# The theoretical standard error is sigma divided by the square root
+# of the sample size.
+se_theoretical_50 <- sd_age / sqrt(n_size)
+
+se_theoretical_50
+sd_sampling_distribution_50
+
+# Again, these are very close to one another, but not identical, this would only 
+# happen if we drew an infinite number of samples.
+
+
+# --- (e) Repeat for n = 10 and n = 200 ----------------------------
+
+set.seed(42)
+
+sample_means_10 <- numeric(n_sims)
+
+for (i in 1:n_sims) {
+  one_sample <- sample(
+    pop_age,
+    size = 10,
+    replace = TRUE
+  )
+  sample_means_10[i] <- mean(one_sample)
+}
+
+set.seed(42)
+
+sample_means_200 <- numeric(n_sims)
+
+for (i in 1:n_sims) {
+  one_sample <- sample(
+    pop_age,
+    size = 200,
+    replace = TRUE
+  )
+  sample_means_200[i] <- mean(one_sample)
+}
+
+sd_10 <- sd(sample_means_10)
+sd_50 <- sd(sample_means_50)
+sd_200 <- sd(sample_means_200)
+
+sd_10
+sd_50
+sd_200
+
+se_10_theoretical <- sd_age / sqrt(10)
+se_50_theoretical <- sd_age / sqrt(50)
+se_200_theoretical <- sd_age / sqrt(200)
+
+se_10_theoretical
+se_50_theoretical
+se_200_theoretical
+
+# The spread becomes smaller as the sample size increases.
+# This reflects the decreasing uncertainty, as the sample size increases.
+
+
+# *****************************************************************
+# EXERCISE 8
+# *****************************************************************
+
+# --- (a) Sample nine countries ------------------------------------
+
+set.seed(123)
+
+n <- 9
+
+samp <- country_means |>
+  slice_sample(n = n)
+
+samp
+
+# pull the country values into a vector for analysis
+sample_values <- samp$mean_Q4B
+sample_values
+
+y_bar <- mean(sample_values)
+s <- sd(sample_values)
+
+y_bar
+s
+
+# --- (b) Exact standard error -------------------------------------
+
+se_exact <- sig_pop / sqrt(n)
+se_exact
+
+# --- (c) Estimated standard error ---------------------------------
+
+se_est <- s / sqrt(n)
+se_est
+
+# --- (d) Compare ---------------------------------------------------
+
+# You could just call these separately:
+se_exact
+se_est
+
+# or if you want this super-elegant:
+se_comparison <- tibble(
+  type = c("Exact", "Estimated"),
+  standard_error = c(se_exact, se_est)
+)
+
+se_comparison
+
+# The values differ because s is calculated from only nine countries.
+# In practice, sigma is usually unknown, so we use the estimated se.
+
+# *****************************************************************
+# EXERCISE 9
+# *****************************************************************
+
+# --- (a) Degrees of freedom ---------------------------------------
+
+df <- n - 1
+df
+
+# 8 degrees of freedom
+
+# --- (b) Critical t-value -----------------------------------------
+
+t_crit <- qt(0.975, df = df)
+t_crit
+
+# --- (c) Compare with z = 1.96 -----------------------------------
+
+z_crit <- qnorm(0.975)
+z_crit
+
+difference_t_z <- t_crit - z_crit
+difference_t_z
+
+# The t-value is larger because the t-distribution has heavier tails.
+# This takes into account the uncertainty arising from the small sample size.
+
+# --- (d) n = 35 ----------------------------------------------------
+
+df_35 <- 35 - 1
+df_35
+
+t_crit_35 <- qt(0.975, df = df_35)
+t_crit_35
+
+# This value is closer to 1.96 than the result of part c), because the sample
+# size is larger and the uncertainty lower.
+
+# --- (e) Plot normal and t distributions --------------------------
+
+x <- seq(-4, 4, length.out = 300)
+
+normal_density <- dnorm(x)
+t_density <- dt(x, df = df)
+
+plot(
+  x,
+  normal_density,
+  type = "l",
+  lwd = 2,
+  ylab = "Density",
+  xlab = "x",
+  main = "Normal Distribution vs t-Distribution"
+)
+
+lines(x, t_density, col = "#e57726", lwd = 2)
+
+legend(
+  "topright",
+  legend = c("Normal", "t (df = 8)"),
+  col = c("black", "#e57726"),
+  lwd = 2
+)
+
+# The t-distribution is flatter and has heavier tails, just as 
+# anticipated on the basis of the preceeding exercises. 
+
+
+# *****************************************************************
+# EXERCISE 10
+# *****************************************************************
+
+# --- (a) Normal interval with known sigma -------------------------
+
+margin_of_error_normal <- z_crit * se_exact
+margin_of_error_normal
+
+ci_normal_lower <- y_bar - margin_of_error_normal
+ci_normal_upper <- y_bar + margin_of_error_normal
+
+ci_normal_lower
+ci_normal_upper
+
+# --- (b) t interval with estimated sigma --------------------------
+
+margin_of_error_t <- t_crit * se_est
+margin_of_error_t
+
+ci_t_lower <- y_bar - margin_of_error_t
+ci_t_upper <- y_bar + margin_of_error_t
+
+ci_t_lower
+ci_t_upper
+
+# --- (c) Comparison table ------------------------------------------
+
+normal_width <- ci_normal_upper - ci_normal_lower
+t_width <- ci_t_upper - ci_t_lower
+
+ci_table <- tibble(
+  distribution = c("Normal", "t"),
+  lower = c(ci_normal_lower, ci_t_lower),
+  upper = c(ci_normal_upper, ci_t_upper),
+  width = c(normal_width, t_width)
+)
+
+ci_table
+
+# The confidence interval using the estimated standard error is wider,
+# reflecting the uncertainty arising from using the sample standard 
+# deviation to estimate the true sigma.
+
+# --- (d) Does the population mean fall inside? --------------------
+
+mu_pop
+
+mu_in_normal_ci <- mu_pop >= ci_normal_lower &
+  mu_pop <= ci_normal_upper
+
+mu_in_t_ci <- mu_pop >= ci_t_lower &
+  mu_pop <= ci_t_upper
+
+mu_in_normal_ci
+mu_in_t_ci
+
+# In this case, mu is contained in both confidence intervals.
+# But remember that a particular 95% interval may or may not contain mu. 
+# The 95% refers to the long-run performance of the interval-producing procedure.
+
+# *****************************************************************
+# EXERCISE 11
+# *****************************************************************
+
+# (a) The statement is incorrect, because the population mean is 
+# treated as fixed. After the interval is calculated, it either 
+# is inside or outside it.
+
+# (b) Correct interpretation:
+# If we repeated the same sampling process many times and calculated a
+# 95% confidence interval each time, approximately 95% of those intervals
+# would contain the true population mean.
+
+# (c) A 99% interval would be wider because it uses a larger critical
+# value and therefore has a larger margin of error.
+
+# (d) Increasing n from 25 to 39 would generally make the interval
+# narrower because the standard error decreases as n increases.
+
+#
+# EOF
+#
