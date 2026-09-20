@@ -23,7 +23,7 @@
 "theme_classic","GGPLOT2","A minimalistic theme with no gridlines",""
 "sum","base","Get sum of numeric values or a vector",""
 "plot","graphics","Generic function from base R to produce a plot",""
-"read.csv","utils","Read a csv file to data frame. Specify stringsAsFactors = FALSE to keep all string columns as characters",""
+"read_csv","readr","Read CSV files",""
 "rm","base","Remove objects",""
 "ls","base","Return a vector of character strings giving the names of the objects in the specified environment",""
 "with","base","evaluate expression in the context of a data frame",""

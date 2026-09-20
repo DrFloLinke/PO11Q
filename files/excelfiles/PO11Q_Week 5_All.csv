@@ -31,3 +31,4 @@
 "summarise","dplyr","collapse the dataset to a summary statistic. Usually used with group_by()",""
 "mean","base","Get mean of a vector",""
 "aggregate","stats","Compute summary statistics of data subsets / by groups",""
+"read_csv","readr","Read CSV files",""
