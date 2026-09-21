@@ -100,7 +100,7 @@ kenya <- kenya |>
 head(kenya)
 table(kenya$Q4A)
 
-# --- (b) Frequency table ------------------------------------------
+# --- (b) Recode to factor variable ------------------------------------------
 
 # Give the five response categories readable labels.
 q4a_labels <- c(
@@ -119,26 +119,28 @@ kenya <- kenya |>
     )
   )
 
-# Count the responses and calculate the relative frequency.
+# --- (c) Frequency table ------------------------------------------
+
+# i. Count the responses and calculate the relative frequency.
 freq_kenya <- kenya |>
   count(Q4A, .drop = FALSE)
 
 freq_kenya
 
-# Calculate the total number of valid responses.
+# ii. Calculate the total number of valid responses.
 total_kenya <- sum(freq_kenya$n)
 total_kenya
 
-# Calculate the probability of each response category.
+# iii. Calculate the probability of each response category.
 freq_kenya <- freq_kenya |>
   mutate(probability = n / total_kenya)
 
 freq_kenya
 
-# Check that the probabilities add up to 1.
+# iv. Check that the probabilities add up to 1.
 sum(freq_kenya$probability)
 
-# --- (c) Bar chart -------------------------------------------------
+# --- (d) Bar chart -------------------------------------------------
 
 kenya_plot <- ggplot(
   freq_kenya,
@@ -164,7 +166,7 @@ highest_kenya_category <- freq_kenya |>
 
 highest_kenya_category
 
-# --- (d) Very bad OR Fairly bad -------------------------------
+# --- (e) Very bad OR Fairly bad -------------------------------
 
 # add the relative frequencies together from 
 
@@ -181,7 +183,7 @@ bad_categories
 sum(bad_categories$probability)
 
 
-# --- (e) Repeat the frequency table for Nigeria -------------------
+# --- (f) Repeat the frequency table for Nigeria -------------------
 
 nigeria <- afro |>
   filter(COUNTRY == 28)
