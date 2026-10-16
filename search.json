@@ -314,7 +314,7 @@
     "href": "04-PO11Q.html#practice-calculations",
     "title": "Week 4",
     "section": "Practice Calculations",
-    "text": "Practice Calculations\nI recommend practicing these calculations (exam relevant). To this end, I have written a small application that will help you check the calculations for any data set up to five observations. Just click the button “Random 5” in the app and you will get a new data set to work with.\n\n  Open Application",
+    "text": "Practice Calculations\nI recommend practicing these calculations (exam relevant). To this end, I have written a small widget that will help you check the calculations for any data set up to five observations. Just click the button “Random 5” in the app and you will get a new data set to work with.\n\n  Open Widget",
     "crumbs": [
       "<span class='chapter-number'>5</span>  <span class='chapter-title'>Week 4</span>"
     ]
@@ -324,7 +324,7 @@
     "href": "04-PO11Q.html#footnotes",
     "title": "Week 4",
     "section": "",
-    "text": "Some of the content of this worksheet is taken from Linke (forthcoming).↩︎\nAll applications on this module were written with the assistance of ChatGPT.↩︎",
+    "text": "Some of the content of this worksheet is taken from Linke (forthcoming).↩︎\nAll widgets on this module were written with the assistance of ChatGPT.↩︎",
     "crumbs": [
       "<span class='chapter-number'>5</span>  <span class='chapter-title'>Week 4</span>"
     ]
