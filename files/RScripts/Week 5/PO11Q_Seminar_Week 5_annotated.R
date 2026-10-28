@@ -109,7 +109,7 @@ EU$access_fac <- factor(EU$access, ordered = TRUE)
 # Recode accession years into named waves (tidyverse)
 ########################################################
 
-EU <- EU %>%
+EU <- EU |>
   mutate(
     wave = recode_factor(
       access_fac,
@@ -125,7 +125,7 @@ EU <- EU %>%
     )
   )
 # This pipeline updates the "EU" data frame:
-# 1) "EU %>%" starts with the EU data and passes it into the next function.
+# 1) "EU |>" starts with the EU data and passes it into the next function.
 # 2) mutate(...) adds a new variable called "wave" to EU (or overwrites it if it exists).
 # 3) recode_factor(access_fac, ...) replaces each accession year in "access_fac" with a
 #    descriptive label (e.g. "1951" becomes "Founding", "1973" becomes "First", etc.).
@@ -143,7 +143,7 @@ levels(EU$wave)
 # Recode accession years into waves using cut()
 ############################
 
-EU <- EU %>%
+EU <- EU |>
   mutate(
     wave1 = cut(
       access,
@@ -171,7 +171,7 @@ EU <- EU %>%
 # Creating a binary (dummy) variable: founding member or not
 ########################################################
 
-EU <- EU %>%
+EU <- EU |>
   mutate(
     founding = recode(
       access_fac,
@@ -192,7 +192,7 @@ EU <- EU %>%
 # 3) The resulting character vector ("Yes"/"No") is stored as the new variable "founding".
 
 
-EU <- EU %>%
+EU <- EU |>
   mutate(
     founding = factor(
       ifelse(access_fac == "1951", "Yes", "No"),
@@ -302,11 +302,11 @@ ungroup(EU_subset)
 # a regular, ungrouped data frame. It is good practice to ungroup once grouped
 # calculations are finished.
 
-eu_popaccess <- EU_subset %>%
-  group_by(access) %>%
+eu_popaccess <- EU_subset |>
+  group_by(access) |>
   summarise(avg = mean(pop18))
 # This pipeline creates a summary data frame "eu_popaccess":
-# 1) EU_subset %>% passes the subset data into group_by(access), forming groups by accession year.
+# 1) EU_subset |> passes the subset data into group_by(access), forming groups by accession year.
 # 2) summarise(avg = mean(pop18)) calculates, for each group, the mean of "pop18" and
 #    stores it in a new variable "avg".
 # 3) The result is a data frame with one row per accession year and a column "avg"

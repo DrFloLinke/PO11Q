@@ -99,7 +99,7 @@ EU$access_fac <- factor(EU$access, ordered = TRUE)
 
 # Recode 'access_fac' into an ordered factor 'wave'
 # giving each accession wave a descriptive label (e.g. "Founding", "First", etc.)
-EU <- EU %>%
+EU <- EU |>
   mutate(
     wave = recode_factor(
       access_fac,
@@ -125,7 +125,7 @@ levels(EU$wave)
 
 # Create a new factor variable 'wave1' using cut() on the numeric 'access' variable
 # and assign descriptive labels to each interval
-EU <- EU %>%
+EU <- EU |>
   mutate(
     wave1 = cut(
       access,
@@ -147,7 +147,7 @@ EU <- EU %>%
 ######################################################################
 
 # Tidyverse approach: recode accession year into "Yes"/"No" for founding members
-EU <- EU %>%
+EU <- EU |>
   mutate(
     founding = recode(
       access_fac,
@@ -163,7 +163,7 @@ EU <- EU %>%
   )
 
 # Shorter tidyverse approach: create 'founding' with ifelse() and make it a factor
-EU <- EU %>%
+EU <- EU |>
   mutate(
     founding = factor(
       ifelse(access_fac == "1951", "Yes", "No"),
@@ -252,8 +252,8 @@ eu_access <- group_by(EU_subset, access)
 ungroup(EU_subset)
 
 # Calculate average population per accession wave (grouped by 'access')
-eu_popaccess <- EU_subset %>%
-  group_by(access) %>%
+eu_popaccess <- EU_subset |>
+  group_by(access) |>
   summarise(avg = mean(pop18))
 
 # Inspect the resulting data frame with average population by accession year
