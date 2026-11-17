@@ -74,7 +74,7 @@ t.test(ks2$english, alternative = "less", mu = 105, conf.level = 0.9995)
 # as the two-sided t test.
 
 # 6.A
-ks2 %>%
+ks2 |>
   mutate(maths_pass = cut(maths,
                           breaks = c(80, 100, 120),
                           labels = c("Fail", "Pass"),
@@ -105,7 +105,7 @@ t.test(ks2$gps[ks2$maths_pass == "Pass"], alternative = "greater", mu = 105, con
 # statistically greater than 105 in GPS on average.
 
 # 7.a
-ks2 %>%
+ks2 |>
   mutate(pass_fail = ifelse(reading < 100 | maths < 100 | gps < 100,
                             "Fail", "Pass")) -> ks2
 
@@ -134,7 +134,7 @@ ks2$normal <- with(ks2, ((avg_all - 80) / (120 - 80)) * 100)
 # the previous 80-120 scale.
 
 # 8.b
-ks2 %>%
+ks2 |>
   mutate(grade = cut(normal, breaks = c(0, 50, 60, 70, 80, 100),
                      labels = c("Fail", "Pass", "Merit", "Distinction", "Distinction+"),
                      right = FALSE,
